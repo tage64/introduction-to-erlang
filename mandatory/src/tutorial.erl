@@ -139,13 +139,13 @@ simpsons() ->
       Name::string().
 
 simpsons(names) ->
-    tbi;
+    [X || {_,_,X} <- simpsons()];
 simpsons(males) ->
-    tbi;
+    [Y || {_,X,Y} <- simpsons(), X =:= male];
 simpsons(females) ->
-    tbi;
+    [Y || {_,X,Y} <- simpsons(), X =:= female];
 simpsons(pets) ->
-    tbi.
+    [Y || {X,_,Y} <- simpsons(), (X =:= cat) or (X =:= pig)].
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%  Guarded Functions  %%%%%%%%%%
@@ -161,8 +161,10 @@ simpsons(pets) ->
 %% </div>
 -spec char_to_upper(char()) -> char().
 
-char_to_upper(Char) when true->
-    tbi.
+char_to_upper(Char) when (Char >= 97) and (Char =< 122) ->
+    Char - 32;
+char_to_upper(Char) ->
+  Char.
 
 %% @doc Convert a character to lower case.
 %% === Example ===
@@ -174,8 +176,10 @@ char_to_upper(Char) when true->
 %% </div>
 -spec char_to_lower(char()) -> char().
 
-char_to_lower(Char) when true ->
-    tbi.
+char_to_lower(Char) when (Char >= 65) and (Char =< 90) ->
+    Char + 32;
+char_to_lower(Char) ->
+  Char.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%  Map  %%%%%%%%%%
@@ -192,7 +196,7 @@ char_to_lower(Char) when true ->
 -spec str_to_upper(string()) -> string().
 
 str_to_upper(String) ->
-    tbi.
+    lists:map(fun(X) -> char_to_upper(X) end, String).
 
 
 %% @doc Convert a string to lower case.
@@ -204,7 +208,7 @@ str_to_upper(String) ->
 -spec str_to_lower(string()) -> string().
 
 str_to_lower(String) ->
-    tbi.
+    lists:map(fun(X) -> char_to_lower(X) end, String).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%  Fold %%%%%%%%%%
@@ -221,7 +225,7 @@ str_to_lower(String) ->
       M::integer().
 
 max([H | T]) ->
-    F = tbi,
+    F = fun(X, Y) -> if X > Y -> X; true -> Y end end,
     lists:foldl(F, H, T).
 
 
@@ -238,7 +242,7 @@ max([H | T]) ->
 
 count(String, Char) ->
 
-    F = tbi,
+    F = fun(C, Acc) -> if C =:= Char -> Acc + 1; true -> Acc end end,
 
     lists:foldl(F, 0, String).
 
@@ -258,7 +262,8 @@ count(String, Char) ->
 odd_and_even(List) ->
     F = fun(X, {{odd, Odd}, {even, Even}}) when X rem 2 == 0 ->
                 {{odd, Odd}, {even, [X | Even]}};
-           (X, {{odd, Odd}, {even, Even}})  -> tbi
+           (X, {{odd, Odd}, {even, Even}})  -> 
+                {{odd, [X | Odd]}, {even, Even}}
         end,
 
     lists:foldl(F, {{odd, []}, {even, []}}, List).
